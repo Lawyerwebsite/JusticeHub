@@ -14,6 +14,7 @@ const {
   updatePhoto,
   todaysAppointments,
   getAdmin,
+  getAdminForUser,
 } = require("../controllers/lawyer.controller");
 const singleUpload = require("../middlewares/multer")
 
@@ -26,10 +27,11 @@ router.delete("/:id", deleteLawyer);
 router.put("/deactivate/:id",deactiveLawyer);
 
 //Admin
-router.post("/login",adminSignin );
+router.post("/login",adminSignin ); 
 router.post("/resetpassword",adminResetpass)
 router.get("/appointmentstoday",todaysAppointments); 
 router.get("/lawyers/",getadminprofile);
+router.get("/lawyerforuser/",getAdminForUser);
 router.put("/lawyerprofile/:id",updateAdmin);
 router.post("/lawyers",Saveprofile);
 router.put("/update",singleUpload,updateprofile )

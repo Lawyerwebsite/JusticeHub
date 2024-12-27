@@ -165,6 +165,21 @@ const getadminprofile = async (req, res) => {
   }
 };
 
+const getAdminForUser = async (req, res) => {
+  try {
+    const {_id} = req.query;
+    console.log(req.query);
+    const lawyers = await Lawyer.findById(_id);
+    console.log(lawyers);
+    if(!lawyers){
+      res.status(400).json({Message:"Data not found"});
+    }
+    res.json({lawyers});
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching lawyer", error });
+  }
+};
+
 const getAdmin = async (req, res) => {
   try {
     const id = req.query;
@@ -431,4 +446,5 @@ module.exports = {
   getTotalClients,
   getTotalIncome,
   getPendingAppointments,
+  getAdminForUser
 };

@@ -55,13 +55,13 @@ const adminSignin = async (req, res) => {
 
 const adminResetpass = async (req, res) => {
   try {
-    const { email, password, conformPassword } = req.body;
-    if (password !== conformPassword)
+    const { email, newPassword, conformPassword } = req.body;
+    if (newPassword !== conformPassword)
       return res.status(400).json({ Message: "Password does not matched..." });
     const findEmail = await Lawyer.findOne({ email });
     if (!findEmail)
       return res.status(400).json({ Message: "Email Not Register..." });
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(newPassword, 10);
     let data = {
       ...req.body,
       password: hash,

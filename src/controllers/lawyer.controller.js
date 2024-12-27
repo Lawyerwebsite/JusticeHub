@@ -55,13 +55,13 @@ const adminSignin = async (req, res) => {
 
 const adminResetpass = async (req, res) => {
   try {
-    const { email, password, conformPassword } = req.body;
-    if (password !== conformPassword)
+    const { email, newPassword, conformPassword } = req.body;
+    if (newPassword !== conformPassword)
       return res.status(400).json({ Message: "Password does not matched..." });
     const findEmail = await Lawyer.findOne({ email });
     if (!findEmail)
       return res.status(400).json({ Message: "Email Not Register..." });
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(newPassword, 10);
     let data = {
       ...req.body,
       password: hash,
@@ -160,6 +160,21 @@ const getadminprofile = async (req, res) => {
     // const { userId } = req.params;
     const lawyers = await Lawyer.find();
     res.status(200).json(lawyers);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching lawyer", error });
+  }
+};
+
+const getAdminForUser = async (req, res) => {
+  try {
+    const {_id} = req.query;
+    console.log(req.query);
+    const lawyers = await Lawyer.findById(_id);
+    console.log(lawyers);
+    if(!lawyers){
+      res.status(400).json({Message:"Data not found"});
+    }
+    res.json({lawyers});
   } catch (error) {
     res.status(500).json({ message: "Error fetching lawyer", error });
   }
@@ -433,4 +448,5 @@ module.exports = {
   getTotalClients,
   getTotalIncome,
   getPendingAppointments,
+  getAdminForUser
 };

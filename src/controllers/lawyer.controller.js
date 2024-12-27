@@ -167,8 +167,10 @@ const getadminprofile = async (req, res) => {
 
 const getAdmin = async (req, res) => {
   try {
-    const id = req.query;
-    const getProfile = await Lawyer.findOne({ _id: id });
+    const {_id}= req.query;
+    const getProfile = await Lawyer.findOne({ _id: _id });
+    console.log(getProfile);
+    
     if (!getProfile) {
       return res.json({ Message: "Admin Not Found..." });
     }
@@ -353,7 +355,7 @@ const getTotalIncome = async (req, res) => {
 
 const getAllLawyer = async (req, res) => {
   try {
-    const findAdmin = await lawyer.find();
+    const findAdmin = await Lawyer.find();
     res.json(findAdmin);
   } catch (error) {
     res.json({
@@ -366,7 +368,7 @@ const updateLawyer = async (req, res) => {
   try {
     let { id } = req.params;
     const updates = req.body;
-    const updateAdmin = await lawyer.findByIdAndUpdate(id, updates, {
+    const updateAdmin = await Lawyer.findByIdAndUpdate(id, updates, {
       new: true,
     });
     if (!updateAdmin) {
@@ -385,7 +387,7 @@ const deleteLawyer = async (req, res) => {
     const { id } = req.params;
     console.log(req.body);
 
-    const deleteAdmin = await lawyer.findByIdAndDelete(id);
+    const deleteAdmin = await Lawyer.findByIdAndDelete(id);
     if (!deleteAdmin) {
       return res.status(404).json({ message: "Admin not Found.." });
     }
@@ -400,7 +402,7 @@ const deleteLawyer = async (req, res) => {
 const deactiveLawyer = async (req, res) => {
   try {
     const { id } = req.params;
-    const admin = await lawyer.findByIdAndUpdate(id, {status: "deactivated" });
+    const admin = await Lawyer.findByIdAndUpdate(id, {status: "deactivated" });
     if (!admin) {
       return res.status(404).json({ message: "Admin not found"})
     }

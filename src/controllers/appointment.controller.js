@@ -35,43 +35,61 @@ const updatestatus = async (req, res) => {
 };
 
 const createAppointment = async (req, res) => {
-    const {
-      userId,
-      name,
-      email, 
-      number,
-      address,
-      date,
-      time,
-      category,
-      discribe
-    } = req.body;
+  try {
+    console.log(req.body);
 
-    if (paymentStatus !== "Success") {
-      return res.status(400).json({ success:false, message: "Payment failed, appointment not booked." });
+    const data = req.body;
+    const createdAppointment = await appointment.create(data);
+
+    if (!createAppointment) {
+      return res.status(404).json({ Message: "Data Not Found" });
     }
+    res.json({ createdAppointment, Message: "Successfully created....." });
+  } catch (err) {
+    console.log(err.message);
 
-      try {
-        const formattedDate = typeof date === "string" ? date.split("T")[0] : new Date(date).toISOString().split("T")[0];
+    res.json({ Error: err.message});
+}
+}
 
-        const newAppointment = new appointment({
-          userId,
-      name,
-      email, 
-      number,
-      address,
-      date: formattedDate,
-      time,
-      category,
-      discribe
-        });
-        await newAppointment.save();
-        res.json({ success: true, message: "Appointment booked successfully" });
-      } catch (error) {
-        console.error("Error creating appointment:",error);
-        res.status(500).json({ success:false, message: "Failed to book appointment." });
-      }
-};
+// const createAppointment = async (req, res) => {
+//     const {
+//       userId,
+//       name,
+//       email, 
+//       number,
+//       address,
+//       date,
+//       time,
+//       category,
+//       discribe
+//     } = req.body;
+
+//     if (paymentStatus !== "Success") {
+//       return res.status(400).json({ success:false, message: "Payment failed, appointment not booked." });
+//     }
+
+//       try {
+//         const formattedDate = typeof date === "string" ? date.split("T")[0] : new Date(date).toISOString().split("T")[0];
+
+//         const newAppointment = new appointment({
+//           userId,
+//       name,
+//       email, 
+//       number,
+//       address,
+//       date: formattedDate,
+//       time,
+//       category,
+//       discribe
+//         });
+//         await newAppointment.save();
+//         res.json({ success: true, message: "Appointment booked successfully" });
+//       } catch (error) {
+//         console.error("Error creating appointment:",error);
+//         res.status(500).json({ success:false, message: "Failed to book appointment." });
+//       }
+// };
 
 const getAllAppointments = async (req, res) => {
   let userData = req.userData;

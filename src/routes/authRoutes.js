@@ -16,7 +16,7 @@ const router = express.Router();
 
 router.post("/signup", superAdminSignup);
 router.post("/login", superLogin);
-router.get("/forgot", superAdminForgotPassword);
+router.post("/forgot", superAdminForgotPassword);
 router.get("/",getSuperAdmin);
 router.post("/", singleUpload, createSuperAdmin);
 router.put("/update", singleUpload, updateSuperAdmin);

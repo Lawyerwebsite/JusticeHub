@@ -36,6 +36,8 @@ const superLogin = async (req, res) => {
     const { email, password } = req.body;
     console.log(req.body);
     const findEmail = await signup.findOne({ email });
+    console.log(findEmail);
+    
     if (!findEmail)
       return res.status(400).json({ message: "Email Not Register..." });
     const findPassword = await bcrypt.compare(password, findEmail.password);
@@ -46,7 +48,7 @@ const superLogin = async (req, res) => {
     const token = await generateToken(findEmail);
     console.log(token);
     
-    res.json({ token, message: " SignIn Successfull..." });
+    res.json({ token,findEmail, message: " SignIn Successfull..." });
   } catch (error) {
     res.json({
       Error: error.message,
@@ -55,29 +57,53 @@ const superLogin = async (req, res) => {
 };
 
 const superAdminForgotPassword = async (req, res) => {
+  const { email, newpassword, conformpassword } = req.body;
   try {
-    const {email, newpassword, conformpassword} = req.body;
-    console.log(req.body);
-    const findEmail = await signup.findOne(email);
+    const findEmail = await signup.findOne({ email });
     console.log(findEmail);
     
-    if (!findEmail)
-      return res.status(400).json({ message: "Email Not Register..." });
-    const findPassword = await bcrypt.compare(newpassword, conformpassword);
-    console.log(findPassword);
-    
-    if (!findPassword)
-      return res.status(400).json({ message: "Password Not Match..." });
-    res.json({
-      findPassword,
-      message: "Password Updated Successfully",
-    });
-    ;
+    if (!findEmail) return res.status(404).json({ message: "Email Not Found..." });
+
+    // const isMatch = await bcrypt.compare(newpassword, findEmail.password);
+    // if (!isMatch) return res.status(400).json({ message: "Password Does Not Match ..." });
+
+    if (newpassword !== conformpassword) {
+      return res.status(400).json({ message: "Password Not Match ..." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(newpassword, salt);
+
+    findEmail.password = hashPassword;
+    await findEmail.save();
+
+    res.status(200).json({ message: "Password Updated Successfully..." });
   } catch (error) {
-    res.json({
-      Error: error.message,
-    });
+    res.status(500).json({ message: error.message });
   }
+  // try {
+  //   const {email, newpassword, conformpassword} = req.body;
+  //   console.log(req.body);
+  //   const findEmail = await signup.findOne(email);
+  //   console.log(findEmail);
+    
+  //   if (!findEmail)
+  //     return res.status(400).json({ message: "Email Not Register..." });
+  //   const findPassword = await bcrypt.compare(newpassword, conformpassword);
+  //   console.log(findPassword);
+    
+  //   if (!findPassword)
+  //     return res.status(400).json({ message: "Password Not Match..." });
+  //   res.json({
+  //     findPassword,
+  //     message: "Password Updated Successfully",
+  //   });
+  //   ;
+  // } catch (error) {
+  //   res.json({
+  //     Error: error.message,
+  //   });
+  // }
 };
 
 const getSuperAdmin = async (req, res) => {

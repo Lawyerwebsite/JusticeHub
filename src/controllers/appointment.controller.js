@@ -78,11 +78,13 @@ const getAllAppointments = async (req, res) => {
 
   try {
     const appointments = await appointment.find();
+    console.log(appointments);
+    
 
     if (appointments.length === 0) {
       return res.status(404).json({ Message: "Data Not Found" });
     }
-    const category = userData.category;
+    const category = userData.category.toLowerCase();
     const allAppointments = appointments.filter(
       (appointment) => appointment.category == category
     );

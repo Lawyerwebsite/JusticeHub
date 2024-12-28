@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const userModel = require("../models/user.models")
+const authsignup = require("../models/user.models")
 const key = "r5sqdtfkgsa^RDT32l43276tasddxzjcnhisydg";
 
 const generateToken = (data) => {
@@ -19,7 +19,7 @@ const verifyToken = async (req, res, next) => {
       const withoutBearer = token.split(" ")[1];
     const payload = jwt.verify(withoutBearer, key);
 
-    const checkUser = await userModel.User.findById(payload.data._id)
+    const checkUser = await authsignup.findById(payload.data._id)
 
     if (!checkUser){
       return res

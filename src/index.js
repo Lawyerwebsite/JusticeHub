@@ -5,6 +5,7 @@ const lawyerRoutes = require("./routes/lawyerRoutes");
 const userRoutes = require("./routes/userRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
 const reportRoutes = require("./routes/reportRoutes");
+const paymentRoutes = require("./routes/razorPayRoutes");
 const path = require("path")
 const cors = require("cors");
 const app = express();
@@ -22,6 +23,7 @@ app.use("/admin", lawyerRoutes);
 app.use("/user", userRoutes);
 app.use("/appointment", appointmentRoutes);
 app.use("/report", reportRoutes);
+app.use("/payment",paymentRoutes);
 
 app.use("/", (req, res) => {
   res.send("Hello World");

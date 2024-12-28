@@ -167,14 +167,14 @@ const getadminprofile = async (req, res) => {
 
 const getAdminForUser = async (req, res) => {
   try {
-    const {_id} = req.query;
+    const { _id } = req.query;
     console.log(req.query);
     const lawyers = await Lawyer.findById(_id);
     console.log(lawyers);
-    if(!lawyers){
-      res.status(400).json({Message:"Data not found"});
+    if (!lawyers) {
+      res.status(400).json({ Message: "Data not found" });
     }
-    res.json({lawyers});
+    res.json({ lawyers });
   } catch (error) {
     res.status(500).json({ message: "Error fetching lawyer", error });
   }
@@ -182,8 +182,10 @@ const getAdminForUser = async (req, res) => {
 
 const getAdmin = async (req, res) => {
   try {
-    const id = req.query;
-    const getProfile = await Lawyer.findOne({ _id: id });
+    const { _id } = req.query;
+    const getProfile = await Lawyer.findOne({ _id: _id });
+    console.log(getProfile);
+
     if (!getProfile) {
       return res.json({ Message: "Admin Not Found..." });
     }
@@ -209,8 +211,8 @@ const updateprofile = async (req, res) => {
     let file = req.file;
     let newFile = req.file;
     console.log("file", file);
-    console.log("newfile",newFile);
-  
+    console.log("newfile", newFile);
+
     let data = {
       ...req.body,
     };
@@ -248,7 +250,9 @@ const updateprofile = async (req, res) => {
         new: true,
       }
     );
-    res.status(200).json({updatedprofile, message: "Profile Updated Successfully" });
+    res
+      .status(200)
+      .json({ updatedprofile, message: "Profile Updated Successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error updating data", error });
   }
@@ -315,8 +319,9 @@ const todaysAppointments = async (req, res) => {
     const today = new Date().toISOString().split("T")[0];
     const todaysAppointments = await appointmentmodel.find({ date: today });
     res.json({
-       count: todaysAppointments.length,
-       data: todaysAppointments });
+      count: todaysAppointments.length,
+      data: todaysAppointments,
+    });
   } catch (error) {
     res.status(500).json({ error: "Error fetching today's appointments" });
   }
@@ -325,7 +330,7 @@ const todaysAppointments = async (req, res) => {
 const getPendingAppointments = async (req, res) => {
   try {
     const pendingAppointments = await Appointment.find({
-      status: "pending", 
+      status: "pending",
     });
 
     res.status(200).json({ count: pendingAppointments.length || 0 });
@@ -336,7 +341,7 @@ const getPendingAppointments = async (req, res) => {
 
 const getTotalClients = async (req, res) => {
   try {
-    const totalClients = await Client.countDocuments(); 
+    const totalClients = await Client.countDocuments();
 
     res.status(200).json({ count: totalClients || 0 });
   } catch (err) {
@@ -353,7 +358,7 @@ const getTotalIncome = async (req, res) => {
       {
         $group: {
           _id: null,
-          total: { $sum: "$fee" }, 
+          total: { $sum: "$fee" },
         },
       },
     ]);
@@ -368,7 +373,7 @@ const getTotalIncome = async (req, res) => {
 
 const getAllLawyer = async (req, res) => {
   try {
-    const findAdmin = await lawyer.find();
+    const findAdmin = await Lawyer.find();
     res.json(findAdmin);
   } catch (error) {
     res.json({
@@ -377,11 +382,20 @@ const getAllLawyer = async (req, res) => {
   }
 };
 
+const getAllAdmin = async (req, res) => {
+  try {
+    const findAdmin = await Lawyer.find();
+    res.json(findAdmin);
+  } catch (error) {
+    res.json({ Error: error.message });
+  }
+};
+
 const updateLawyer = async (req, res) => {
   try {
     let { id } = req.params;
     const updates = req.body;
-    const updateAdmin = await lawyer.findByIdAndUpdate(id, updates, {
+    const updateAdmin = await Lawyer.findByIdAndUpdate(id, updates, {
       new: true,
     });
     if (!updateAdmin) {
@@ -400,7 +414,7 @@ const deleteLawyer = async (req, res) => {
     const { id } = req.params;
     console.log(req.body);
 
-    const deleteAdmin = await lawyer.findByIdAndDelete(id);
+    const deleteAdmin = await Lawyer.findByIdAndDelete(id);
     if (!deleteAdmin) {
       return res.status(404).json({ message: "Admin not Found.." });
     }
@@ -415,15 +429,15 @@ const deleteLawyer = async (req, res) => {
 const deactiveLawyer = async (req, res) => {
   try {
     const { id } = req.params;
-    const admin = await lawyer.findByIdAndUpdate(id, {status: "deactivated" });
+    const admin = await Lawyer.findByIdAndUpdate(id, { status: "deactivated" });
     if (!admin) {
-      return res.status(404).json({ message: "Admin not found"})
+      return res.status(404).json({ message: "Admin not found" });
     }
     res.json({ admin, message: "Admin deactivated successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};
 
 module.exports = {
   lawyerSignup,
@@ -446,5 +460,6 @@ module.exports = {
   getTotalClients,
   getTotalIncome,
   getPendingAppointments,
-  getAdminForUser
+  getAdminForUser,
+  getAllAdmin
 };

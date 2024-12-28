@@ -9,17 +9,14 @@ const signUpSchema = new mongoose.Schema(
     },
     name: {
       type: String,
-      required: true,
     },
     email: {
       type: String,
-      required: true,
       trim: true,
       lowercase: true,
     },
     mobile: {
       type: Number,
-      required: true,
     },
     address:{
       type: String,
@@ -44,3 +41,6 @@ const signUpSchema = new mongoose.Schema(
 const authsignup = mongoose.model("user", signUpSchema);
 
 module.exports = authsignup;
+
+
+

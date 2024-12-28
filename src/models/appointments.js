@@ -56,6 +56,9 @@ const appointmentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    lawyerName:{
+      type:String,
+    },
     fileName: {
       type: String,
     },
@@ -72,6 +75,13 @@ const appointmentSchema = new mongoose.Schema(
     url: {
       type: String,
     },
+    payment:{
+      type: String,
+    },
+    status:{
+      type:String,
+      default: 'pending',
+    }
   },
   { timestamps: true }
 );

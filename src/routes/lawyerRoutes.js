@@ -15,6 +15,7 @@ const {
   todaysAppointments,
   getAdmin,
   getAdminForUser,
+  getAllAdmin,
 } = require("../controllers/lawyer.controller");
 const singleUpload = require("../middlewares/multer")
 
@@ -37,6 +38,7 @@ router.post("/lawyers",Saveprofile);
 router.put("/update",singleUpload,updateprofile )
 router.get("/lawyerprofile",getprofileid);
 router.get("/getadmin", getAdmin)
+router.get("/get", getAllAdmin)
 
 
 module.exports = router;

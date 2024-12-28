@@ -42,9 +42,9 @@ const createAppointment = async (req, res) => {
     const createdAppointment = await appointment.create(data);
 
     if (!createAppointment) {
-      return res.status(404).json({ Message: "Data Not Found" });
+      return res.status(404).json({ message: "Data Not Found" });
     }
-    res.json({ createdAppointment, Message: "Successfully created....." });
+    res.json({ createdAppointment, message: "Successfully created....." });
   } catch (err) {
     console.log(err.message);
 

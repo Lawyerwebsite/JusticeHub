@@ -1,5 +1,5 @@
 const User = require("../models/user.models")
-const { generateToken } = require("../middlewares/authToken");
+const { generateToken } = require("../middlewares/userAuthToken");
 const bcrypt = require("bcrypt");
 
 const UserSignup = async (req, res) => {
@@ -85,8 +85,8 @@ const createUser = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const {_id} = req.params;
-    const users = await User.find(_id);
+   
+    const users = await User.find();
     console.log(users);
     res.status(200).json(users);
   } catch (error) {

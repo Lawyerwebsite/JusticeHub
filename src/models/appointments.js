@@ -59,6 +59,10 @@ const appointmentSchema = new mongoose.Schema(
     lawyerName:{
       type:String,
     },
+    lawyerId:{
+      type:String,
+    },
+
     fileName: {
       type: String,
     },

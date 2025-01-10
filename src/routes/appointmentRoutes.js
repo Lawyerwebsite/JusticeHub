@@ -1,22 +1,40 @@
 const express = require("express");
-const { addAppointment, updatestatus, createAppointment, getAllAppointments, getSingleAppointment, updateStatus, reschedule, updateAppointmentforFile, getAppointment } = require("../controllers/appointment.controller");
+const {
+  addAppointment,
+  updatestatus,
+  createAppointment,
+  getAllAppointments,
+  getSingleAppointment,
+  updateStatus,
+  reschedule,
+  updateAppointmentforFile,
+  getAppointment,
+  getAppointmentsForLawyer,
+} = require("../controllers/appointment.controller");
+
 const router = express.Router();
-const admin =require("../middlewares/admin.token")
-const user = require("../middlewares/userAuthToken")
-const singleUpload = require("../middlewares/multer")
+const admin = require("../middlewares/admin.token");
+const user = require("../middlewares/userAuthToken");
+const singleUpload = require("../middlewares/multer");
 
+// Public Routes
+router.post("/add", addAppointment); // Adds an appointment (no token validation here)
+router.get("/", getAppointment);    // Gets all appointments (public)
 
-router.post("/add",addAppointment);
-router.patch("/:id",updatestatus);
-router.get("/",getAppointment);
+// User-Specific Routes
+router.route("/add").post(user.verifyToken, createAppointment);
 
-router.route("/add").post(user.verifyToken,createAppointment)
-router.route("/get").get(admin.verifyToken,getAllAppointments)
-router.route("/getsingleappointment").get(admin.verifyToken,getSingleAppointment)
-router.route("/updatestatus").put(admin.verifyToken,updateStatus)
-router.route("/reschedule").put(admin.verifyToken,reschedule);
-router.route("/updatefile").put(admin.verifyToken,singleUpload,updateAppointmentforFile);
+// Admin-Specific Routes
+router.route("/get").get(admin.verifyToken, getAllAppointments);
+router.route("/getsingleappointment").get(admin.verifyToken, getSingleAppointment);
+router.route("/updatestatus").put(admin.verifyToken, updateStatus);
+router.route("/reschedule").put(admin.verifyToken, reschedule);
+router.route("/updatefile").put(admin.verifyToken, singleUpload, updateAppointmentforFile);
 
-router.route("/")
+// Lawyer-Specific Routes
+router.route("/single").get(admin.verifyToken, getAppointmentsForLawyer); // Uses `req.query` for filtering
+
+// Specific Appointment Updates
+router.patch("/:id", updatestatus); // Updates status by ID (general, public route)
 
 module.exports = router;

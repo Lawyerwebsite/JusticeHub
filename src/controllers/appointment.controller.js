@@ -38,8 +38,12 @@ const createAppointment = async (req, res) => {
   try {
     console.log(req.body);
 
+
     const data = req.body;
-    const createdAppointment = await appointment.create(data);
+    const lawyerId = {...createAppointment}
+    console.log(lawyerId);
+    
+    const createdAppointment = await appointment.create(data, lawyerId);
 
     if (!createAppointment) {
       return res.status(404).json({ message: "Data Not Found" });
@@ -52,60 +56,20 @@ const createAppointment = async (req, res) => {
 }
 }
 
-// const createAppointment = async (req, res) => {
-//     const {
-//       userId,
-//       name,
-//       email, 
-//       number,
-//       address,
-//       date,
-//       time,
-//       category,
-//       discribe
-//     } = req.body;
-
-//     if (paymentStatus !== "Success") {
-//       return res.status(400).json({ success:false, message: "Payment failed, appointment not booked." });
-//     }
-
-//       try {
-//         const formattedDate = typeof date === "string" ? date.split("T")[0] : new Date(date).toISOString().split("T")[0];
-
-//         const newAppointment = new appointment({
-//           userId,
-//       name,
-//       email, 
-//       number,
-//       address,
-//       date: formattedDate,
-//       time,
-//       category,
-//       discribe
-//         });
-//         await newAppointment.save();
-//         res.json({ success: true, message: "Appointment booked successfully" });
-//       } catch (error) {
-//         console.error("Error creating appointment:",error);
-//         res.status(500).json({ success:false, message: "Failed to book appointment." });
-//       }
-// };
-
 const getAllAppointments = async (req, res) => {
   let userData = req.userData;
 
   try {
     const appointments = await appointment.find();
-    console.log(appointments);
-    
-
     if (appointments.length === 0) {
       return res.status(404).json({ Message: "Data Not Found" });
     }
     const category = userData.category.toLowerCase();
+    
     const allAppointments = appointments.filter(
-      (appointment) => appointment.category == category
+      (appointment) => appointment.category.toLowerCase() == category
     );
+    
     res.json({ allAppointments, Message: "Successfully fetched....." });
   } catch (err) {
     console.log(err.message);
@@ -147,9 +111,13 @@ const updateStatus = async (req, res) => {
 };
 
 const reschedule = async (req, res) => {
+  console.log("reschedule");
+  
   try {
     let { _id } = req.query;
     let data = req.body;
+    console.log("data",data);
+    
     const updatedAppointment = await appointment.findByIdAndUpdate(_id, data, {
       new: true,
     });
@@ -233,6 +201,32 @@ const getAppointmentById = async (req, res) => {
   }
 };
 
+const getAppointmentsForLawyer = async (req, res) => {
+  try {
+    const { lawyerId } = req.query; // Extract lawyerId from query parameters
+
+    if (!lawyerId) {
+      return res.status(400).json({ message: "Lawyer ID is required" });
+    }
+
+    // Fetch appointments for the specific lawyer
+    const appointments = await appointment.find({ lawyerId });
+
+    if (appointments.length === 0) {
+      return res.status(404).json({ message: "No appointments found for this lawyer" });
+    }
+
+    res.status(200).json({
+      success: true,
+      appointments,
+      message: "Appointments fetched successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
 
 module.exports = {
   createAppointment,
@@ -247,5 +241,6 @@ module.exports = {
   getAppointment,
   getAllAppointment,
   getAppointmentById,
-  addAppointment
+  addAppointment,
+  getAppointmentsForLawyer
 };

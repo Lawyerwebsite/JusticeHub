@@ -4,6 +4,7 @@ const sendMailToUser = require("../utils/adminEmailSend");
 const { generateToken } = require("../middlewares/authToken");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
+const appointmentmodel = require("../models/appointments");
 
 const lawyerSignup = async (req, res) => {
   try {
@@ -312,62 +313,43 @@ const updatePhoto = async (req, res) => {
       message: error.message,
     });
   }
-};
-
-const todaysAppointments = async (req, res) => {
+};const getDashboardData = async (req, res) => {
   try {
-    const today = new Date().toISOString().split("T")[0];
-    const todaysAppointments = await appointmentmodel.find({ date: today });
-    res.json({
-      count: todaysAppointments.length,
-      data: todaysAppointments,
+    const { _id } = req.query;
+
+    if (!_id) {
+      return res.status(400).json({ success: false, error: "Missing _id parameter" });
+    }
+
+    console.log("Admin ID:", _id);
+
+    // Proceed with your logic
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+    const ongoingAppointments = await appointmentmodel.countDocuments({
+      date: { $gte: startOfDay, $lte: endOfDay },
+      status: "ongoing",
     });
-  } catch (error) {
-    res.status(500).json({ error: "Error fetching today's appointments" });
-  }
-};
 
-const getPendingAppointments = async (req, res) => {
-  try {
-    const pendingAppointments = await Appointment.find({
+    const pendingAppointments = await appointmentmodel.countDocuments({
       status: "pending",
     });
 
-    res.status(200).json({ count: pendingAppointments.length || 0 });
-  } catch (err) {
-    res.status(500).json({ error: "Error fetching pending appointments." });
-  }
-};
+    
 
-const getTotalClients = async (req, res) => {
-  try {
-    const totalClients = await Client.countDocuments();
-
-    res.status(200).json({ count: totalClients || 0 });
-  } catch (err) {
-    res.status(500).json({ error: "Error fetching total clients." });
-  }
-};
-
-const getTotalIncome = async (req, res) => {
-  try {
-    const totalIncome = await Appointment.aggregate([
-      {
-        $match: { status: "completed" },
+    res.json({
+      success: true,
+      data: {
+        todaysAppointments: ongoingAppointments,
+        pendingAppointments,
+        
       },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$fee" },
-        },
-      },
-    ]);
-
-    const total = totalIncome[0]?.total || 0;
-
-    res.status(200).json({ total });
-  } catch (err) {
-    res.status(500).json({ error: "Error calculating total income." });
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard data:", error);
+    res.status(500).json({ success: false, error: "Failed to fetch dashboard data" });
   }
 };
 
@@ -439,6 +421,11 @@ const deactiveLawyer = async (req, res) => {
   }
 };
 
+
+
+  
+
+
 module.exports = {
   lawyerSignup,
   getAllLawyer,
@@ -456,10 +443,7 @@ module.exports = {
   getprofileid,
   updatePhoto,
   getAdmin,
-  todaysAppointments,
-  getTotalClients,
-  getTotalIncome,
-  getPendingAppointments,
+  getDashboardData,
   getAdminForUser,
   getAllAdmin
 };

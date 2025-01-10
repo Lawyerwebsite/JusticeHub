@@ -12,12 +12,14 @@ const {
   updateprofile,
   getprofileid,
   updatePhoto,
-  todaysAppointments,
   getAdmin,
   getAdminForUser,
   getAllAdmin,
+  getDashboardData,
 } = require("../controllers/lawyer.controller");
 const singleUpload = require("../middlewares/multer")
+const appointmentController = require("../controllers/appointment.controller");
+const { verifyToken } = require("../middlewares/admin.token");
 
 const router = express.Router();
 //super Admin
@@ -30,7 +32,7 @@ router.put("/deactivate/:id",deactiveLawyer);
 //Admin
 router.post("/login",adminSignin ); 
 router.post("/resetpassword",adminResetpass)
-router.get("/appointmentstoday",todaysAppointments); 
+router.get("/dashboard", getDashboardData)
 router.get("/lawyers/",getadminprofile);
 router.get("/lawyerforuser/",getAdminForUser);
 router.put("/lawyerprofile/:id",updateAdmin);
@@ -39,6 +41,7 @@ router.put("/update",singleUpload,updateprofile )
 router.get("/lawyerprofile",getprofileid);
 router.get("/getadmin", getAdmin)
 router.get("/get", getAllAdmin)
+router.post("/create", verifyToken, appointmentController.createAppointment)
 
 
 module.exports = router;

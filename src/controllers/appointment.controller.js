@@ -77,6 +77,48 @@ const getAllAppointments = async (req, res) => {
   }
 };
 
+const getallAppointment = async (req, res) => {
+  let userData = req.userData;
+  
+
+  try {
+    const lawyerId = userData._id;
+
+    if (!lawyerId) {
+      return res.status(400).json({ Error: "lawyerId is missing in user data." });
+    }
+
+    const allAppointments = await appointment.find({ lawyerId });
+
+    if (allAppointments.length === 0) {
+      return res.status(404).json({ Message: "No appointments found for this lawyer." });
+    }
+    const counts = {
+      "TotalClient": allAppointments.length,
+      "Pending": allAppointments.filter(app => app.status === 'pending').length,
+      "Resolved": allAppointments.filter(app => app.status === 'Resolved').length,
+      "Ongoing":allAppointments.filter(app=>app.status === 'Ongoing').length,
+     "OngoingResolvedCount": allAppointments.filter(app => 
+        ['ongoing', 'resolved'].includes(app.status.trim().toLowerCase())
+      ).length,
+     
+   
+    
+    
+      
+    } 
+
+    res.json({ allAppointments,counts, Message: "Successfully fetched....." });
+  }
+  
+  catch (err) {
+    console.log(err.message);
+    res.status(500).json({ Error: err.message });
+  }
+};
+
+
+
 const getSingleAppointment = async (req, res) => {
   let { _id } = req.query;
   console.log(_id);
@@ -242,5 +284,7 @@ module.exports = {
   getAllAppointment,
   getAppointmentById,
   addAppointment,
-  getAppointmentsForLawyer
+  getAppointmentsForLawyer,
+  getallAppointment
+  
 };

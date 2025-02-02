@@ -10,6 +10,7 @@ const {
   updateAppointmentforFile,
   getAppointment,
   getAppointmentsForLawyer,
+  getallAppointment,
 } = require("../controllers/appointment.controller");
 
 const router = express.Router();
@@ -25,6 +26,7 @@ router.get("/", getAppointment);    // Gets all appointments (public)
 router.route("/add").post(user.verifyToken, createAppointment);
 
 // Admin-Specific Routes
+router .route("/gets").get(admin.verifyToken,getallAppointment);
 router.route("/get").get(admin.verifyToken, getAllAppointments);
 router.route("/getsingleappointment").get(admin.verifyToken, getSingleAppointment);
 router.route("/updatestatus").put(admin.verifyToken, updateStatus);
@@ -36,5 +38,6 @@ router.route("/single").get(admin.verifyToken, getAppointmentsForLawyer); // Use
 
 // Specific Appointment Updates
 router.patch("/:id", updatestatus); // Updates status by ID (general, public route)
+
 
 module.exports = router;

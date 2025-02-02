@@ -4,6 +4,8 @@ const sendMailToUser = require("../utils/adminEmailSend");
 const { generateToken } = require("../middlewares/authToken");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
+
+
 const appointmentmodel = require("../models/appointments");
 
 const lawyerSignup = async (req, res) => {
@@ -313,45 +315,9 @@ const updatePhoto = async (req, res) => {
       message: error.message,
     });
   }
-};const getDashboardData = async (req, res) => {
-  try {
-    const { _id } = req.query;
-
-    if (!_id) {
-      return res.status(400).json({ success: false, error: "Missing _id parameter" });
-    }
-
-    console.log("Admin ID:", _id);
-
-    // Proceed with your logic
-    const today = new Date();
-    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-
-    const ongoingAppointments = await appointmentmodel.countDocuments({
-      date: { $gte: startOfDay, $lte: endOfDay },
-      status: "ongoing",
-    });
-
-    const pendingAppointments = await appointmentmodel.countDocuments({
-      status: "pending",
-    });
-
-    
-
-    res.json({
-      success: true,
-      data: {
-        todaysAppointments: ongoingAppointments,
-        pendingAppointments,
-        
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching dashboard data:", error);
-    res.status(500).json({ success: false, error: "Failed to fetch dashboard data" });
-  }
 };
+
+
 
 const getAllLawyer = async (req, res) => {
   try {
@@ -422,6 +388,79 @@ const deactiveLawyer = async (req, res) => {
 };
 
 
+const totalappointment = async (req,res)=>{
+  try {
+    const lawyerId  = req.user.id;
+    if(!lawyerId){
+      return res.status(401).json({message:"Unauthorized" })
+    }
+    const count = await appointmentmodel.countDocuments({
+      lawyerId: lawyerId
+    
+    });
+    res.json({ totalappointments : count });
+  }
+  catch(err){
+    res.status(500).json({message : 'Error fetching totalappointments' });
+    }
+
+}
+
+const Dashboard = async (req, res) => {
+  try {
+    const lawyerId = req.userData._id;
+    
+    // Get all appointments for the lawyer
+    const allAppointments = await appointmentmodel.find({ lawyerId });
+
+    // Calculate metrics
+    const statusNormalizedApps = allAppointments.map(app => ({
+      ...app._doc,
+      status: app.status.trim().toLowerCase()
+    }));
+
+    // Total appointments excluding cancelled/other statuses
+    const totalAppointments = statusNormalizedApps.filter(app => 
+      ['ongoing', 'resolved'].includes(app.status)
+    ).length;
+
+    // Pending appointments count
+    const pendingAppointments = statusNormalizedApps.filter(
+      app => app.status === 'pending'
+    ).length;
+
+    // Unique client count with email validation
+    const uniqueEmails = new Set(
+      statusNormalizedApps
+        .filter(app => app.email) // Remove entries without email
+        .map(app => app.email.toLowerCase().trim())
+    );
+    
+    const totalClients = uniqueEmails.size;
+
+    // Total income calculation
+    const totalIncome = statusNormalizedApps
+      .filter(app => app.status === 'resolved')
+      .reduce((sum, app) => sum + (app.fee || 0), 0);
+
+    res.json({
+      totalAppointments,
+      pendingAppointments,
+      totalClients,
+      totalIncome,
+      message: "Dashboard data fetched successfully"
+    });
+
+  } catch (err) {
+    console.error('Dashboard Error:', err);
+    res.status(500).json({ 
+      error: "Server error while fetching dashboard data",
+      details: err.message
+    });
+  }
+};
+
+
 
   
 
@@ -443,7 +482,8 @@ module.exports = {
   getprofileid,
   updatePhoto,
   getAdmin,
-  getDashboardData,
   getAdminForUser,
-  getAllAdmin
+  getAllAdmin,
+  totalappointment,
+  Dashboard,
 };

@@ -69,6 +69,12 @@ const lawyerSchema = new mongoose.Schema({
   workplace: {
     type: String,
   },
+  enrollmentnumber:{
+    type:String,
+  },
+  registernumber:{
+    type:String,
+  },
 
   status: {
     type: String,

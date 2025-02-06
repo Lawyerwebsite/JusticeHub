@@ -33,7 +33,19 @@ const signUpSchema = new mongoose.Schema(
     },
     profileImage:{
       type:String
-    }
+    },
+    fileName: {
+      type: String,
+    },
+    filePath: {
+      type: String,
+    },
+    fileType: {
+      type: String,
+    },
+    fileOriginalName: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

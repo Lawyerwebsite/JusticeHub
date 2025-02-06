@@ -23,7 +23,7 @@ router.delete("/:id", deleteUser);
 // router.post("/create",createUser)
 
 
-router.get('/profile', getProfile);
+router.get('/profile/:id ', getProfile);
 router.put('/profile', singleUpload, updateProfile);
 router.delete('/profile', deleteProfile);
 

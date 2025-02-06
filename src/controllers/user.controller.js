@@ -40,6 +40,7 @@ const UserSignin = async (req, res) => {
     }
     const token = generateToken({ _id: user._id, email: user.email });
     res.status(200).json({
+      _id: user._id,
       message: "Successfully signed in!",
       token,
     });
@@ -120,8 +121,9 @@ const deleteUser = async (req, res) => {
 };
 
 const getProfile = async (req, res) => {
+  const { _id } = req.params;
   try {
-    const profile = await Profile.findOne();
+    const profile = await User.findOne({ _id});
     res.json(profile || {});
   } catch (error) {
     res.status(500).json({ message: "Error fetching profile data", error });
@@ -129,58 +131,95 @@ const getProfile = async (req, res) => {
 };
 
 const updateProfile = async (req, res) => {
-  const { name, email, mobile, address, dist, pincode } = req.body;
-  const profileImage = req.file ? `/uploads/${req.file.filename}` : undefined;
-
   try {
-    let profile = await Profile.findOne();
-
-    if (!profile) {
-      return res.status(404).json({ message: "Profile not found" });
-    }
-
-    if (profileImage && profile.profileImage) {
-      const oldImagePath = path.join(__dirname, "../", profile.profileImage);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath);
+    let { _id } = req.query;
+    let newFile = req.file;
+    let file = req.file;
+    let data = {
+      ...req.body,
+    };
+    console.log(data);
+    
+    if (newFile) {
+      const oldFile = await User.findById(_id);
+      if(!oldFile) {
+        return res.status(404).json({ message: "Data not found.." });
+      }
+      if (oldFile.fileOriginalName) {
+        fs.unlinkSync(`${oldFile.filePath}/${oldFile.fileName}`);
+        data.fileName = newFile.fileName;
+        data.fileOriginalName = newFile.originalname;
+        data.filePath = newFile.destination;
+        data.fileType = newFile.mimetype;
+      } else {
+        data = {
+          ...data,
+          filePath: file.destination,
+          fileOriginalName: file.originalname,
+          fileName: file.filename,
+          fileType: file.mimetype,
+        };
       }
     }
-
-    profile.name = name || profile.name;
-    profile.email = email || profile.email;
-    profile.mobile = mobile || profile.mobile;
-    profile.address = address || profile.address;
-    profile.dist = dist || profile.dist;
-    profile.pincode = pincode || profile.pincode;
-    if (profileImage) profile.profileImage = profileImage;
-
-    await profile.save();
-    res.json({ message: "Profile updated successfully", data: profile });
+    const updateUser = await User.findByIdAndUpdate(_id,data, {new:true});
+    console.log(updateUser);
+    
+    res.json({ updateUser, message: "Profile updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error updating profile data", error });
+    res.json({ message: "Error updating profile data", error });
   }
+  // const { name, email, mobile, address, dist, pincode } = req.body;
+  // const profileImage = req.file ? `/uploads/${req.file.filename}` : undefined;
+
+  // try {
+  //   let profile = await User.findOne();
+
+  //   if (!profile) {
+  //     return res.status(404).json({ message: "Profile not found" });
+  //   }
+
+  //   if (profileImage && profile.profileImage) {
+  //     const oldImagePath = path.join(__dirname, "../", profile.profileImage);
+  //     if (fs.existsSync(oldImagePath)) {
+  //       fs.unlinkSync(oldImagePath);
+  //     }
+  //   }
+
+  //   profile.name = name || profile.name;
+  //   profile.email = email || profile.email;
+  //   profile.mobile = mobile || profile.mobile;
+  //   profile.address = address || profile.address;
+  //   profile.dist = dist || profile.dist;
+  //   profile.pincode = pincode || profile.pincode;
+  //   if (profileImage) profile.profileImage = profileImage;
+
+  //   await profile.save();
+  //   res.json({ message: "Profile updated successfully", data: profile });
+  // } catch (error) {
+  //   res.status(500).json({ message: "Error updating profile data", error });
+  // }
 };
 
 const deleteProfile = async (req, res) => {
   try {
-    const profile = await Profile.findOne();
+    const profile = await User.findOne();
     if (!profile) {
-      return res.status(404).json({ message: 'Profile not found' });
+      return res.status(404).json({ message: "Profile not found" });
     }
 
     if (profile.profileImage) {
-      const imagePath = path.join(__dirname, '../', profile.profileImage);
+      const imagePath = path.join(__dirname, "../", profile.profileImage);
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
       }
     }
 
     await profile.deleteOne();
-    res.json({ message: 'Profile deleted successfully' });
+    res.json({ message: "Profile deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting profile', error });
+    res.status(500).json({ message: "Error deleting profile", error });
   }
-}
+};
 
 module.exports = {
   UserSignup,
@@ -189,8 +228,7 @@ module.exports = {
   getUser,
   updateUserStatus,
   deleteUser,
-
   getProfile,
   updateProfile,
-  deleteProfile
+  deleteProfile,
 };

@@ -8,6 +8,7 @@ const generateToken = (data) => {
 };
 
 const verifyToken = async (req, res, next) => {
+ console.log("hoiiii");
  
   try {
     const token = req.headers.authorization;
@@ -20,12 +21,14 @@ const verifyToken = async (req, res, next) => {
     const payload = jwt.verify(withoutBearer, key);
 
     const checkUser = await authsignup.findById(payload.data._id)
+    console.log(checkUser);
+    
 
     if (!checkUser){
       return res
         .status(404)
         .json({ Message: "user not found for this token..." });}
-    req.userData = checkUser.userId;
+    req.userData = checkUser;
     next();
   } catch (error) {
     console.log(error);

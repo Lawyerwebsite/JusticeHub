@@ -11,6 +11,6 @@ const upload = multer({
   storage,
 });
 
-const singleUpload = upload.single("image");
+const singleUpload = upload.single("profileImage");
 
 module.exports = singleUpload;

@@ -92,6 +92,19 @@ const getUser = async (req, res) => {
     Error: error.message;
   }
 };
+const getUserById = async (req, res) => {
+  try {
+    let userData = req.userData;
+    const user = await User.findById({ _id: userData._id });
+    console.log(userData);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
 
 const updateUserStatus = async (req, res) => {
   const { _id } = req.params;
@@ -122,8 +135,10 @@ const deleteUser = async (req, res) => {
 
 const getProfile = async (req, res) => {
   const { _id } = req.params;
+  console.log(_id);
+
   try {
-    const profile = await User.findOne({ _id});
+    const profile = await User.findOne({ _id });
     res.json(profile || {});
   } catch (error) {
     res.status(500).json({ message: "Error fetching profile data", error });
@@ -131,43 +146,65 @@ const getProfile = async (req, res) => {
 };
 
 const updateProfile = async (req, res) => {
+  console.log("come");
   try {
-    let { _id } = req.query;
-    let newFile = req.file;
-    let file = req.file;
-    let data = {
-      ...req.body,
+    let {_id} =req.userData;
+    const updatedData = {
+      name: req.body.name,
+      email: req.body.email,
+      mobile: req.body.mobile,
+      address: req.body.address,
+      dist: req.body.dist,
+      pincode: req.body.pincode,
     };
-    console.log(data);
-    
-    if (newFile) {
-      const oldFile = await User.findById(_id);
-      if(!oldFile) {
-        return res.status(404).json({ message: "Data not found.." });
-      }
-      if (oldFile.fileOriginalName) {
-        fs.unlinkSync(`${oldFile.filePath}/${oldFile.fileName}`);
-        data.fileName = newFile.fileName;
-        data.fileOriginalName = newFile.originalname;
-        data.filePath = newFile.destination;
-        data.fileType = newFile.mimetype;
-      } else {
-        data = {
-          ...data,
-          filePath: file.destination,
-          fileOriginalName: file.originalname,
-          fileName: file.filename,
-          fileType: file.mimetype,
-        };
-      }
+
+    if (req.file) {
+      updatedData.profileImage = `/uploads/${req.file.filename}`;
     }
-    const updateUser = await User.findByIdAndUpdate(_id,data, {new:true});
-    console.log(updateUser);
-    
-    res.json({ updateUser, message: "Profile updated successfully" });
+    const user = await User.findByIdAndUpdate(_id, updatedData, {new: true});
+    res.status(200).json({user, message: "Profile updated successfully"});
   } catch (error) {
-    res.json({ message: "Error updating profile data", error });
+    res.status(500).json({ error:"Error updating profile data", error });
   }
+  
+  // try {
+  //   let { _id } = req.userData;
+  //   let newFile = req.file;
+  //   let file = req.file;
+  //   let data = {
+  //     ...req.body,
+  //   };
+  //   console.log("data===>",data);
+
+  //   if (newFile) {
+  //     const oldFile = await User.findById(_id);
+  //     if (!oldFile) {
+  //       return res.status(404).json({ message: "Data not found.." });
+  //     }
+  //     if (oldFile.fileOriginalName) {
+  //       fs.unlinkSync(`${oldFile.filePath}/${oldFile.fileName}`);
+  //       data.fileName = newFile.fileName;
+  //       data.fileOriginalName = newFile.originalname;
+  //       data.filePath = newFile.destination;
+  //       data.fileType = newFile.mimetype;
+  //     } else {
+  //       data = {
+  //         ...data,
+  //         filePath: file.destination,
+  //         fileOriginalName: file.originalname,
+  //         fileName: file.filename,
+  //         fileType: file.mimetype,
+  //       };
+  //     }
+  //   }
+    
+  //   const updateUser = await User.findByIdAndUpdate(_id, data, { new: true });
+  //   console.log(updateUser);
+
+  //   res.json({ updateUser, message: "Profile updated successfully" });
+  // } catch (error) {
+  //   res.json({ message: "Error updating profile data", error });
+  // }
   // const { name, email, mobile, address, dist, pincode } = req.body;
   // const profileImage = req.file ? `/uploads/${req.file.filename}` : undefined;
 
@@ -231,4 +268,5 @@ module.exports = {
   getProfile,
   updateProfile,
   deleteProfile,
+  getUserById,
 };
